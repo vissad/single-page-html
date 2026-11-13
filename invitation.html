@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta property="og:title" content="You're Invited! Housewarming Ceremony" />
+    <meta property="og:description" content="Join us to celebrate our new home at GHR Callisto." />
+    <meta property="og:image" content="https://vissad.github.io/single-page-html/invitation.jpg" />
+    <meta property="og:url" content="https://vissad.github.io/single-page-html/invitation.html" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Housewarming Invitation</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tone.js for Sound Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'serif': ['"Playfair Display"', 'serif'],
+                        'script': ['"Dancing Script"', 'cursive'],
+                        'sans': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'wall-cream': '#e8ded2',
+                        'wall-shadow': '#c9beaf',
+                        'door-base': '#573824',
+                        'door-panel': '#432918',
+                        'door-trim': '#2f1c10',
+                        'gold-light': '#FFE9A0',
+                        'gold-mid': '#D4AF37',
+                        'gold-dark': '#AA771C',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #12100e;
+            background-image: 
+                radial-gradient(circle at 50% 25%, #2a221b 0%, #0d0b09 85%);
+            margin: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+            padding: 1.25rem 0.5rem;
+            box-sizing: border-box;
+        }
+
+        /* 3D Perspective Scene */
+        .perspective-scene {
+            perspective: 1300px;
+        }
+
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+
+        /* Doors */
+        .door {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, #6b4329, #54331d, #422614);
+            /* 4 Second Slow Opening Transition */
+            transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 4s ease;
+            transform-style: preserve-3d;
+            z-index: 30;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.7);
+        }
+
+        .door-left {
+            left: 0;
+            transform-origin: left center;
+            border-right: 1.5px solid #231207;
+        }
+
+        .door-right {
+            right: 0;
+            transform-origin: right center;
+            border-left: 1.5px solid #231207;
+        }
+
+        /* Door Open States: Outward swing of 160 degrees */
+        .is-open .door-left {
+            transform: translateZ(10px) rotateY(-160deg);
+            box-shadow: 25px 0 35px rgba(0,0,0,0.6);
+        }
+
+        .is-open .door-right {
+            transform: translateZ(10px) rotateY(160deg);
+            box-shadow: -25px 0 35px rgba(0,0,0,0.6);
+        }
+
+        /* Sleek Modern Long Handle (Matches photo) */
+        .modern-handle {
+            position: absolute;
+            top: 36%;
+            height: 28%;
+            width: 8px;
+            background: linear-gradient(to right, #e8be5d, #ffd978, #b8860b);
+            border-radius: 2px;
+            box-shadow: -2px 3px 6px rgba(0,0,0,0.7), inset 1px 1px 2px rgba(255,255,255,0.6);
+            z-index: 35;
+        }
+
+        /* Peephole */
+        .peephole {
+            position: absolute;
+            top: 24%;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #222 45%, #ffd700 70%, #996515 100%);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.7);
+        }
+
+        /* The Room / Invitation Card Inside */
+        .room {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fffcf4;
+            background-image: radial-gradient(circle at center, rgba(255, 238, 175, 0.45) 0%, transparent 70%);
+            box-shadow: inset 0 0 70px rgba(0,0,0,0.85);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 1.25rem;
+            opacity: 1;
+            transition: box-shadow 4s ease-in-out;
+        }
+
+        .is-open .room {
+            box-shadow: inset 0 0 35px rgba(212, 175, 55, 0.25), 0 0 60px rgba(255, 220, 110, 0.45);
+        }
+
+        /* Subtle glowing text for instruction */
+        @keyframes gentle-pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; text-shadow: 0 0 10px rgba(255, 230, 150, 0.8); }
+        }
+        .instruction-text {
+            animation: gentle-pulse 2.8s infinite;
+        }
+
+        /* Temple Bell Swing Animation */
+        @keyframes bell-swing {
+            0% { transform: rotate(0deg); }
+            15% { transform: rotate(35deg); }
+            30% { transform: rotate(-26deg); }
+            45% { transform: rotate(16deg); }
+            60% { transform: rotate(-10deg); }
+            75% { transform: rotate(5deg); }
+            100% { transform: rotate(0deg); }
+        }
+        .is-ringing {
+            animation: bell-swing 2.5s ease-in-out forwards;
+        }
+
+        /* Brushed Gold Nameplate */
+        .brushed-metal {
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 25%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.12) 75%, rgba(255,255,255,0.15) 100%),
+                linear-gradient(to bottom, #F7D070, #D4AF37, #9B6C14);
+        }
+
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 15;
+        }
+        @keyframes float-up {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            20% { opacity: 0.8; }
+            100% { transform: translateY(-110px) scale(1.3); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="font-sans antialiased">
+
+    <!-- Instructions Text -->
+    <div id="instruction" class="absolute top-12 sm:top-16 md:top-20 left-0 right-0 text-center text-[#ffea9f] font-serif text-sm sm:text-lg md:text-xl tracking-wider transition-opacity duration-700 z-50 instruction-text px-4 drop-shadow-lg italic">
+        Our home awaits you. Chime the bell to experience the warmth of our new beginnings.
+    </div>
+
+    <!-- MAIN SCENE WRAPPER -->
+    <div class="relative w-full max-w-4xl flex items-end justify-center min-h-[580px] sm:min-h-[660px] md:min-h-[720px] pt-12 pb-6 px-1">
+        
+        <!-- ================= ARCHITECTURAL WALL BACKGROUND ================= -->
+        <!-- Cream Wall Structure Behind Entrance -->
+        <div class="relative w-[88vw] sm:w-[76vw] max-w-[560px] h-[72vh] min-h-[520px] max-h-[620px] bg-gradient-to-b from-[#ebe1d3] via-[#ded1be] to-[#cfc1ac] rounded-t-lg shadow-[0_20px_50px_rgba(0,0,0,0.9)] border-t border-x border-[#f8f2e9] flex justify-center items-center pb-8 overflow-visible">
+
+            <!-- RIGHT SIDE STATION: Wall Accessories (Nameplate & Temple Bell) -->
+            <!-- Placed at z-15 so when the right door swings outward (z-30) it fully hides them -->
+            <div class="absolute right-2 sm:right-6 md:right-8 top-20 sm:top-24 flex flex-col items-center gap-5 sm:gap-7 z-15 w-[26vw] sm:w-[16vw] max-w-[120px] select-none">
+                
+                <!-- 1. Gold-Plated Nameplate (Black Engraved Font) -->
+                <div class="relative w-full brushed-metal p-[3.5px] rounded-sm shadow-[0_4px_12px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.7)] border border-[#5c400e]">
+                    <!-- Screws -->
+                    <div class="absolute top-1 left-1 w-1.5 h-1.5 rounded-full bg-gradient-to-br from-[#fff2cc] to-[#8c6214]"></div>
+                    <div class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-gradient-to-br from-[#fff2cc] to-[#8c6214]"></div>
+                    <div class="absolute bottom-1 left-1 w-1.5 h-1.5 rounded-full bg-gradient-to-br from-[#fff2cc] to-[#8c6214]"></div>
+                    <div class="absolute bottom-1 right-1 w-1.5 h-1.5 rounded-full bg-gradient-to-br from-[#fff2cc] to-[#8c6214]"></div>
+
+                    <!-- Inner Plate -->
+                    <div class="bg-gradient-to-b from-[#FFF2B2] via-[#E2BE5A] to-[#C99C2E] border border-[#7a5912] rounded-[1px] px-1.5 py-2 flex flex-col items-center justify-center text-center shadow-[inset_0_0_5px_rgba(0,0,0,0.3)]">
+                        <div class="font-serif font-black text-[#0f0f0f] leading-tight w-full">
+                            <div class="text-[8px] sm:text-[10px] font-extrabold tracking-tight pb-[2px] border-b border-black/35 w-full">
+                                KIRAN & PALLAVI
+                            </div>
+                            <div class="text-[7.5px] sm:text-[9px] font-bold tracking-widest text-[#151515] mt-[2px]">
+                                I 506
+                            </div>
+                            <div class="text-[7px] sm:text-[8px] font-bold tracking-wider text-[#1c1c1c] mt-[1px]">
+                                GHR CALLISTO
+                            </div>
+                            <div class="text-[6.5px] sm:text-[7.5px] font-semibold tracking-widest text-[#222222] mt-[1px]">
+                                KOLLUR
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Traditional Hanging Temple Bell -->
+                <div id="bellAssembly" onclick="ringBell()" title="Click to ring temple bell" 
+                     class="relative flex flex-col items-center cursor-pointer group mt-2 z-20">
+                    
+                    <!-- Wall Mount Bracket -->
+                    <div class="w-5 h-2.5 sm:w-6 sm:h-3 bg-gradient-to-b from-[#8c6214] to-[#4a3311] rounded-t-full shadow-[0_2px_4px_rgba(0,0,0,0.7)] border border-[#30210a] relative z-20">
+                        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-1 bg-[#221706] rounded-t-sm"></div>
+                    </div>
+                    
+                    <!-- Swinging Part (Sacred Thread + Bell) -->
+                    <div id="swingingPart" class="flex flex-col items-center" style="transform-origin: top center;">
+                        <!-- Red Kalava Thread -->
+                        <div class="w-[1.5px] sm:w-[2px] h-9 sm:h-12 bg-gradient-to-b from-[#9e2a0c] via-[#b71c1c] to-[#7f1d1d] shadow-sm"></div>
+                        
+                        <!-- Brass Ring Mount -->
+                        <div class="w-3 h-3 sm:w-3.5 sm:h-3.5 border-[2px] border-[#8c6214] rounded-full -mt-1.5 z-10 bg-transparent"></div>
+                        
+                        <!-- Temple Bell Dome Body -->
+                        <div class="w-8 h-8 sm:w-11 sm:h-11 bg-gradient-to-b from-[#ffea9f] via-[#d4af37] to-[#805912] shadow-[inset_-3px_-3px_7px_rgba(0,0,0,0.45),0_4px_6px_rgba(0,0,0,0.6)] -mt-1 relative" style="border-radius: 50% 50% 12% 12% / 80% 80% 10% 10%;">
+                            <!-- Engraved rings on bell -->
+                            <div class="absolute bottom-1.5 left-0 w-full h-[1px] bg-[#5c400e] opacity-50"></div>
+                            <div class="absolute bottom-2.5 left-0 w-full h-[1px] bg-[#5c400e] opacity-50"></div>
+                        </div>
+                        
+                        <!-- Bell Bottom Flange Rim -->
+                        <div class="w-10 h-2 sm:w-13 sm:h-2.5 bg-gradient-to-r from-[#5c400e] via-[#ffe58f] to-[#5c400e] rounded-full shadow-[0_3px_5px_rgba(0,0,0,0.6)] -mt-1 z-10 border-b border-[#3a2808]"></div>
+                        
+                        <!-- Clapper -->
+                        <div class="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 bg-gradient-to-br from-[#4a3311] to-[#120b02] rounded-full -mt-1 shadow-md z-0"></div>
+                    </div>
+                    
+                    <!-- Small instruction label -->
+                    <div class="text-[5.5px] sm:text-[7px] text-[#54360e] mt-1.5 font-bold uppercase tracking-widest opacity-80" id="ringLabel">Ring</div>
+                </div>
+
+            </div>
+
+            <!-- ================= DOOR FRAME ================= -->
+            <div class="relative w-[56vw] sm:w-[48vw] max-w-[340px] h-[92%] perspective-scene z-20 mr-20 sm:mr-28 md:mr-32">
+                
+                <!-- Main Wooden Frame (Inner Portal) -->
+                <div id="mainFrame" class="door-frame absolute -inset-2 sm:-inset-3 bg-[#24150b] shadow-[0_15px_35px_rgba(0,0,0,0.85)] rounded-t-sm z-0 transform-style-3d border-b-4 border-[#120a05]">
+                    
+                    <!-- ================= INNER SCENE (DOORS & INVITATION) ================= -->
+                    <div id="doorWrapper" class="relative w-full h-full transform-style-3d shadow-[inset_0_0_20px_rgba(0,0,0,0.9)] overflow-visible">
+                        
+                        <!-- THE INVITATION (Inside Room) -->
+                        <div class="room text-center flex flex-col items-center justify-center select-none relative">
+                            
+                            <!-- STAGE 1: Greeting Screen (Kept the Namasthe text but removed the image) -->
+                           <!--  <div id="greeting-screen" class="absolute inset-0 transition-opacity duration-1000 opacity-100 z-20 overflow-hidden rounded-sm pointer-events-none">
+                                <h2 class="absolute z-20 bottom-[10%] w-full text-center text-white text-[3.5rem] font-script font-bold" style="text-shadow: 2px 2px 12px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.6);">Namasthe</h2>
+                            </div> -->
+
+                            <!-- STAGE 2: Invitation Screen (Now default visibility) -->
+                            <div id="invitation-screen" class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-100 pointer-events-auto z-10 pb-2">
+                                
+                                <!-- Top Brass Motif -->
+                                <div class="mb-1 sm:mb-2 text-[#d4af37] opacity-80 w-8 sm:w-10">
+                                    <svg viewBox="0 0 60 20" fill="currentColor">
+                                        <path d="M30 0L35 10L45 12L37 17L40 20L30 15L20 20L23 17L15 12L25 10L30 0Z" />
+                                        <path d="M10 10L15 15L10 20L5 15L10 10Z" opacity="0.6" />
+                                        <path d="M50 10L55 15L50 20L45 15L50 10Z" opacity="0.6" />
+                                    </svg>
+                                </div>
+
+                                <h1 class="text-2xl sm:text-3xl md:text-4xl font-script text-[#732a12] mb-1.5 sm:mb-3 leading-tight drop-shadow font-bold">
+                                    Welcome to Our<br>New Home!
+                                </h1>
+                                
+                                <div class="w-12 h-[1px] bg-[#d4af37] mb-1.5 sm:mb-3 opacity-60"></div>
+
+                                <div class="px-2 sm:px-4 mb-2 max-w-sm">
+                                    <p class="font-serif text-[#2b1e10] text-[12px] sm:text-[15px] leading-relaxed font-medium italic">
+                                        "A house is built with walls and beams, but a home is made with love and dreams."
+                                    </p>
+                                    <p class="font-sans text-[#5c432a] text-[11px] sm:text-[13px] mt-1.5 sm:mt-2.5 leading-relaxed">
+                                        We are happy to share this special moment with you. Thank you for stepping in to bless our new beginnings at GHR Callisto.
+                                    </p>
+                                </div>
+
+                                <div class="space-y-0.5 font-serif text-center w-full mb-1 sm:mb-2">
+                                    <span class="block text-[#a89270] text-[7px] sm:text-[8px] uppercase tracking-widest">Date</span>
+                                    <span class="text-[#211609] font-bold text-[10px] sm:text-sm">November 28th, 2026</span>
+                                </div>
+
+                                <!-- Location Map Pin -->
+                                <div class="mt-1 sm:mt-1.5 mb-1 sm:mb-2">
+                                    <a href="https://maps.app.goo.gl/hpG7vcSW2rVzkcyw8" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-[#fffbf0] to-[#fff4d4] border border-[#d4af37]/60 px-3 py-1.5 rounded-full shadow-[0_2px_6px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_10px_rgba(0,0,0,0.15)] transition-all hover:scale-105 cursor-pointer z-50 relative pointer-events-auto">
+                                        <svg class="w-3 h-3 sm:w-4 sm:h-4 text-[#a6401c]" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                        </svg>
+                                        <span class="text-[#5c432a] text-[8px] sm:text-[10px] font-bold tracking-wider uppercase">View Location</span>
+                                    </a>
+                                </div>
+
+                                <div class="mt-1.5 sm:mt-2 pt-1.5 border-t border-amber-200/60 w-3/4">
+                                    <p class="text-[8px] sm:text-[10px] text-[#8c7853] italic">With Love,</p>
+                                    <p class="font-script text-xl sm:text-2xl text-[#873617] font-bold mt-0.5">Kiran & Pallavi</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Magic Sparkle Particles -->
+                            <div id="particles" class="absolute inset-0 pointer-events-none overflow-visible rounded z-30"></div>
+                        </div>
+
+                        <!-- THE DOORS (Rich Warm Wood as shown in photo) -->
+                        <!-- Left Door -->
+                        <div class="door door-left flex flex-col p-2.5 sm:p-4 gap-3 sm:gap-4">
+                            <!-- Horizontal panel grooving as in photo -->
+                            <div class="w-full h-1/4 border-b border-[#29160a] bg-door-panel/40 shadow-inner rounded-sm"></div>
+                            <div class="w-full h-1/4 border-b border-[#29160a] bg-door-panel/40 shadow-inner rounded-sm"></div>
+                            <div class="w-full h-1/4 border-b border-[#29160a] bg-door-panel/40 shadow-inner rounded-sm"></div>
+                            <div class="w-full h-1/4 bg-door-panel/40 shadow-inner rounded-sm"></div>
+                        </div>
+                        
+                        <!-- Right Door -->
+                        <div class="door door-right flex flex-col p-2.5 sm:p-4 gap-3 sm:gap-4">
+                            <!-- Peephole -->
+                            <div class="peephole left-3 sm:left-4"></div>
+                            <!-- Modern Vertical Brass Handle -->
+                            <div class="modern-handle left-3 sm:left-4"></div>
+                            
+                            <!-- Horizontal panel grooving -->
+                            <div class="w-full h-1/4 border-b border-[#29160a] bg-door-panel/40 shadow-inner rounded-sm"></div>
+                            <div class="w-full h-1/4 border-b border-[#29160a] bg-door-panel/40 shadow-inner rounded-sm"></div>
+                            <div class="w-full h-1/4 border-b border-[#29160a] bg-door-panel/40 shadow-inner rounded-sm"></div>
+                            <div class="w-full h-1/4 bg-door-panel/40 shadow-inner rounded-sm"></div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    <!-- Restart Button -->
+    <button id="restartBtn" onclick="resetInvitation()" class="fixed bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#D4AF37] via-[#F7D070] to-[#9B6C14] text-[#120a05] font-serif font-bold py-2.5 px-6 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.8)] border border-[#fff2cc] opacity-0 pointer-events-none transition-opacity duration-1000 z-50 text-sm sm:text-base tracking-wider hover:scale-105 transform hover:shadow-[0_6px_20px_rgba(0,0,0,0.9)]">
+        Close Doors & Replay
+    </button>
+
+    <!-- AUDIO & LOGIC CONTROLLER -->
+    <script>
+        let hasOpened = false;
+
+        async function ringBell() {
+            if (hasOpened) return; // Prevent double trigger
+            hasOpened = true;
+
+            // 1. Audio: Pure Two-Tone "Ding-Dong" Synthesizer
+            await Tone.start();
+            
+            const chimeSynth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: "sine" },
+                envelope: { attack: 0.005, decay: 1.2, sustain: 0.05, release: 1.8 }
+            }).toDestination();
+            
+            const reverb = new Tone.Reverb({ decay: 2.4, preDelay: 0.02 }).toDestination();
+            chimeSynth.connect(reverb);
+            
+            const now = Tone.now();
+            // "Ding" (~E5 with upper resonant shimmer)
+            chimeSynth.triggerAttackRelease(["E5", "B5"], "4n", now);
+            // "Dong" (~C5 lower chord after 0.6s)
+            chimeSynth.triggerAttackRelease(["C5", "G5"], "2n", now + 0.6);
+
+            // 2. Trigger Swinging Animation & Disable Re-click
+            const bellAssembly = document.getElementById('bellAssembly');
+            bellAssembly.style.pointerEvents = 'none';
+            
+            const swingingPart = document.getElementById('swingingPart');
+            swingingPart.classList.add('is-ringing');
+            
+            document.getElementById('ringLabel').style.opacity = '0';
+            
+            // Fade out the instruction
+            const instruction = document.getElementById('instruction');
+            instruction.classList.remove('instruction-text');
+            instruction.style.opacity = '0';
+
+            // 3. Precise Timing Sequence:
+            // Bell sound (~1.5s) + 2 seconds waiting pause = 3.5 seconds
+            setTimeout(() => {
+                // Trigger 4-second slow door opening animation
+                document.getElementById('doorWrapper').classList.add('is-open');
+                document.getElementById('mainFrame').classList.add('is-open');
+                
+                // Spawn warm interior greeting particles
+                spawnParticles();
+
+                // Show restart button 4 seconds after doors start opening (when they finish opening)
+                setTimeout(() => {
+                    const restartBtn = document.getElementById('restartBtn');
+                    restartBtn.classList.remove('opacity-0', 'pointer-events-none');
+                    restartBtn.classList.add('opacity-100', 'pointer-events-auto');
+                }, 4000);
+            }, 3500);
+        }
+
+        // Reset the invitation to original state
+        function resetInvitation() {
+            // Hide the restart button immediately
+            const restartBtn = document.getElementById('restartBtn');
+            restartBtn.classList.add('opacity-0', 'pointer-events-none');
+            restartBtn.classList.remove('opacity-100', 'pointer-events-auto');
+
+            // Close the doors (Trigger reverse 4-second CSS transition)
+            document.getElementById('doorWrapper').classList.remove('is-open');
+            document.getElementById('mainFrame').classList.remove('is-open');
+
+            // Wait 4 seconds for doors to finish closing, then reset interactive elements
+            setTimeout(() => {
+                hasOpened = false;
+                
+                // Reset Bell interactability
+                const bellAssembly = document.getElementById('bellAssembly');
+                bellAssembly.style.pointerEvents = 'auto';
+                
+                // Remove bell swinging animation state
+                const swingingPart = document.getElementById('swingingPart');
+                swingingPart.classList.remove('is-ringing');
+                
+                // Reset small text labels
+                document.getElementById('ringLabel').style.opacity = '0.8';
+                
+                const instruction = document.getElementById('instruction');
+                instruction.classList.add('instruction-text');
+                instruction.style.opacity = '0.8';
+            }, 4000);
+        }
+
+        // Warm interior particle generator
+        function spawnParticles() {
+            const container = document.getElementById('particles');
+            const colors = ['#fde68a', '#fef08a', '#ffffff', '#ffedd5'];
+            
+            for (let i = 0; i < 28; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    
+                    const size = Math.random() * 3.5 + 2;
+                    const left = Math.random() * 100;
+                    const top = 35 + Math.random() * 65;
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    const duration = 2.5 + Math.random() * 3;
+                    
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    particle.style.left = `${left}%`;
+                    particle.style.top = `${top}%`;
+                    particle.style.backgroundColor = color;
+                    particle.style.boxShadow = `0 0 ${size * 2.5}px ${color}`;
+                    particle.style.animation = `float-up ${duration}s ease-in forwards`;
+                    
+                    container.appendChild(particle);
+                    
+                    setTimeout(() => particle.remove(), duration * 1000);
+                }, i * 140);
+            }
+        }
+    </script>
+</body>
+</html>
